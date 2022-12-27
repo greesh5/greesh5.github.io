@@ -6,7 +6,7 @@ function updateCounter() {
      //if count is null then set count to 
      
      if(count==null){
-        count=1;}
+        count=null || 1}
      else{
         count++;}
      
