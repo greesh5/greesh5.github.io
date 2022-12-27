@@ -6,9 +6,10 @@ function updateCounter() {
      //if count is null then set count to 
      
      if(count==null){
-        count=null || 1}
-     else{
+        count=null || 1 ;}
+     else{ 
         count++;}
+        
      
      //else increment the count by 1 (Note: count is a string so convert it to number using parseInt)
     
