@@ -1,25 +1,21 @@
 /*
-	Astral by HTML5 UP
+	Highlights by HTML5 UP
 	html5up.net | @ajlkn
 	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
 */
 
 (function($) {
 
-	var $window = $(window),
+	var	$window = $(window),
 		$body = $('body'),
-		$wrapper = $('#wrapper'),
-		$main = $('#main'),
-		$panels = $main.children('.panel'),
-		$nav = $('#nav'), $nav_links = $nav.children('a');
+		$html = $('html');
 
 	// Breakpoints.
 		breakpoints({
-			xlarge:  [ '1281px',  '1680px' ],
-			large:   [ '981px',   '1280px' ],
-			medium:  [ '737px',   '980px'  ],
-			small:   [ '361px',   '736px'  ],
-			xsmall:  [ null,      '360px'  ]
+			large:   [ '981px',  '1680px' ],
+			medium:  [ '737px',  '980px'  ],
+			small:   [ '481px',  '736px'  ],
+			xsmall:  [ null,     '480px'  ]
 		});
 
 	// Play initial animations on page load.
@@ -29,184 +25,150 @@
 			}, 100);
 		});
 
-	// Nav.
-		$nav_links
-			.on('click', function(event) {
+	// Touch mode.
+		if (browser.mobile) {
 
-				var href = $(this).attr('href');
+			var $wrapper;
 
-				// Not a panel link? Bail.
-					if (href.charAt(0) != '#'
-					||	$panels.filter(href).length == 0)
-						return;
+			// Create wrapper.
+				$body.wrapInner('<div id="wrapper" />');
+				$wrapper = $('#wrapper');
 
-				// Prevent default.
-					event.preventDefault();
-					event.stopPropagation();
+				// Hack: iOS vh bug.
+					if (browser.os == 'ios')
+						$wrapper
+							.css('margin-top', -25)
+							.css('padding-bottom', 25);
 
-				// Change panels.
-					if (window.location.hash != href)
-						window.location.hash = href;
+				// Pass scroll event to window.
+					$wrapper.on('scroll', function() {
+						$window.trigger('scroll');
+					});
 
-			});
+			// Scrolly.
+				$window.on('load.hl_scrolly', function() {
 
-	// Panels.
+					$('.scrolly').scrolly({
+						speed: 1500,
+						parent: $wrapper,
+						pollOnce: true
+					});
 
-		// Initialize.
-			(function() {
-
-				var $panel, $link;
-
-				// Get panel, link.
-					if (window.location.hash) {
-
-				 		$panel = $panels.filter(window.location.hash);
-						$link = $nav_links.filter('[href="' + window.location.hash + '"]');
-
-					}
-
-				// No panel/link? Default to first.
-					if (!$panel
-					||	$panel.length == 0) {
-
-						$panel = $panels.first();
-						$link = $nav_links.first();
-
-					}
-
-				// Deactivate all panels except this one.
-					$panels.not($panel)
-						.addClass('inactive')
-						.hide();
-
-				// Activate link.
-					$link
-						.addClass('active');
-
-				// Reset scroll.
-					$window.scrollTop(0);
-
-			})();
-
-		// Hashchange event.
-			$window.on('hashchange', function(event) {
-
-				var $panel, $link;
-
-				// Get panel, link.
-					if (window.location.hash) {
-
-				 		$panel = $panels.filter(window.location.hash);
-						$link = $nav_links.filter('[href="' + window.location.hash + '"]');
-
-						// No target panel? Bail.
-							if ($panel.length == 0)
-								return;
-
-					}
-
-				// No panel/link? Default to first.
-					else {
-
-						$panel = $panels.first();
-						$link = $nav_links.first();
-
-					}
-
-				// Deactivate all panels.
-					$panels.addClass('inactive');
-
-				// Deactivate all links.
-					$nav_links.removeClass('active');
-
-				// Activate target link.
-					$link.addClass('active');
-
-				// Set max/min height.
-					$main
-						.css('max-height', $main.height() + 'px')
-						.css('min-height', $main.height() + 'px');
-
-				// Delay.
-					setTimeout(function() {
-
-						// Hide all panels.
-							$panels.hide();
-
-						// Show target panel.
-							$panel.show();
-
-						// Set new max/min height.
-							$main
-								.css('max-height', $panel.outerHeight() + 'px')
-								.css('min-height', $panel.outerHeight() + 'px');
-
-						// Reset scroll.
-							$window.scrollTop(0);
-
-						// Delay.
-							window.setTimeout(function() {
-
-								// Activate target panel.
-									$panel.removeClass('inactive');
-
-								// Clear max/min height.
-									$main
-										.css('max-height', '')
-										.css('min-height', '');
-
-								// IE: Refresh.
-									$window.triggerHandler('--refresh');
-
-								// Unlock.
-									locked = false;
-
-							}, (breakpoints.active('small') ? 0 : 500));
-
-					}, 250);
-
-			});
-
-	// IE: Fixes.
-		if (browser.name == 'ie') {
-
-			// Fix min-height/flexbox.
-				$window.on('--refresh', function() {
-
-					$wrapper.css('height', 'auto');
-
-					window.setTimeout(function() {
-
-						var h = $wrapper.height(),
-							wh = $window.height();
-
-						if (h < wh)
-							$wrapper.css('height', '100vh');
-
-					}, 0);
+					$window.off('load.hl_scrolly');
 
 				});
 
-				$window.on('resize load', function() {
-					$window.triggerHandler('--refresh');
-				});
+			// Enable touch mode.
+				$html.addClass('is-touch');
 
-			// Fix intro pic.
-				$('.panel.intro').each(function() {
+		}
+		else {
 
-					var $pic = $(this).children('.pic'),
-						$img = $pic.children('img');
-
-					$pic
-						.css('background-image', 'url(' + $img.attr('src') + ')')
-						.css('background-size', 'cover')
-						.css('background-position', 'center');
-
-					$img
-						.css('visibility', 'hidden');
-
+			// Scrolly.
+				$('.scrolly').scrolly({
+					speed: 1500
 				});
 
 		}
+
+	// Header.
+		var $header = $('#header'),
+			$headerTitle = $header.find('header'),
+			$headerContainer = $header.find('.container');
+
+		// Make title fixed.
+			if (!browser.mobile) {
+
+				$window.on('load.hl_headerTitle', function() {
+
+					breakpoints.on('>medium', function() {
+
+						$headerTitle
+							.css('position', 'fixed')
+							.css('height', 'auto')
+							.css('top', '50%')
+							.css('left', '0')
+							.css('width', '100%')
+							.css('margin-top', ($headerTitle.outerHeight() / -2));
+
+					});
+
+					breakpoints.on('<=medium', function() {
+
+						$headerTitle
+							.css('position', '')
+							.css('height', '')
+							.css('top', '')
+							.css('left', '')
+							.css('width', '')
+							.css('margin-top', '');
+
+					});
+
+					$window.off('load.hl_headerTitle');
+
+				});
+
+			}
+
+		// Scrollex.
+			breakpoints.on('>small', function() {
+				$header.scrollex({
+					terminate: function() {
+
+						$headerTitle.css('opacity', '');
+
+					},
+					scroll: function(progress) {
+
+						// Fade out title as user scrolls down.
+							if (progress > 0.5)
+								x = 1 - progress;
+							else
+								x = progress;
+
+							$headerTitle.css('opacity', Math.max(0, Math.min(1, x * 2)));
+
+					}
+				});
+			});
+
+			breakpoints.on('<=small', function() {
+
+				$header.unscrollex();
+
+			});
+
+	// Main sections.
+		$('.main').each(function() {
+
+			var $this = $(this),
+				$primaryImg = $this.find('.image.primary > img'),
+				$bg,
+				options;
+
+			// No primary image? Bail.
+				if ($primaryImg.length == 0)
+					return;
+
+			// Create bg and append it to body.
+				$bg = $('<div class="main-bg" id="' + $this.attr('id') + '-bg"></div>')
+					.css('background-image', (
+						'url("assets/css/images/overlay.png"), url("' + $primaryImg.attr('src') + '")'
+					))
+					.appendTo($body);
+
+			// Scrollex.
+				$this.scrollex({
+					mode: 'middle',
+					delay: 200,
+					top: '-10vh',
+					bottom: '-10vh',
+					init: function() { $bg.removeClass('active'); },
+					enter: function() { $bg.addClass('active'); },
+					leave: function() { $bg.removeClass('active'); }
+				});
+
+		});
 
 })(jQuery);
